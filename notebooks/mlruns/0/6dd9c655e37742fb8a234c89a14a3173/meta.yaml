@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/snehitha/citi_bike_project/notebooks/mlruns/0/6dd9c655e37742fb8a234c89a14a3173/artifacts
+end_time: 1746310102554
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 6dd9c655e37742fb8a234c89a14a3173
+run_name: Baseline - Lag_1
+run_uuid: 6dd9c655e37742fb8a234c89a14a3173
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1746310102547
+status: 3
+tags: []
+user_id: snehitha
