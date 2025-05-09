@@ -1,7 +1,6 @@
-# scripts/train_model.py
-
 import hopsworks
-import mlflow
+import joblib
+import tempfile
 import lightgbm as lgb
 import pandas as pd
 from sklearn.metrics import mean_absolute_error
@@ -21,34 +20,25 @@ y = df["target"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Step 4: Train and log model to DagsHub MLflow
-mlflow.set_tracking_uri("https://dagshub.com/sai-snehitha/citi-bike-prediction-system.mlflow")
-mlflow.set_registry_uri("https://dagshub.com/sai-snehitha/citi-bike-prediction-system.mlflow")
+# Step 4: Train model
+model = lgb.LGBMRegressor()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+mae = mean_absolute_error(y_test, y_pred)
 
-with mlflow.start_run():
-    model = lgb.LGBMRegressor()
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+# Step 5: Save and register model to Hopsworks
+model_dir = tempfile.mkdtemp()
+joblib.dump(model, f"{model_dir}/model.pkl")
 
-    mae = mean_absolute_error(y_test, y_pred)
-    mlflow.log_metric("mae", mae)
-
-    mlflow.sklearn.log_model(
-        sk_model=model,
-        artifact_path="model",
-        registered_model_name="citi_bike_best_model"
-    )
-
-# Step 5: Save model to Hopsworks Model Registry
-model_registry = project.get_model_registry()
-model_hopsworks = model_registry.python.create_model(
+mr = project.get_model_registry()
+model_hops = mr.python.create_model(
     name="citi_bike_best_model",
-    metrics={"mae": mae},
-    model=model,
-    input_example=X_train.iloc[:1],
-    model_schema=X_train,
-    description="LightGBM model for Citi Bike prediction"
+    model_dir=model_dir,
+    input_example=X_train[:2],
+    description="LightGBM model trained on Citi Bike features",
+    requirements=["lightgbm", "scikit-learn"],
+    metrics={"mae": mae}
 )
-model_hopsworks.save()
 
-print("✅ Model logged to DagsHub MLflow and saved to Hopsworks Registry.")
+model_hops.save()
+print("✅ Model registered to Hopsworks.")
