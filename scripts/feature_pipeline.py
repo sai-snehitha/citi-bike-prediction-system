@@ -6,19 +6,19 @@ from scripts.data_utils import transform_ts_data_into_features_and_target_loop
 project = hopsworks.login()
 fs = project.get_feature_store()
 
-# Step 2: Load raw data from feature store
+# Step 2: Load raw time series data from feature store
 fg = fs.get_feature_group(name="citi_bike_features", version=2)
 ts_df = fg.read(read_options={"use_hive": True})
 
-# Step 3: Run feature engineering
-location_ids = ["JC115"]  # You can include others like "HB102", "HB105"
+# Step 3: Run feature engineering for valid location IDs
+location_ids = ts_df["location_id"].unique().tolist()  # Dynamically get location IDs
 feature_dfs = transform_ts_data_into_features_and_target_loop(ts_df, location_ids=location_ids)
 feature_df = pd.concat(feature_dfs.values())
 
-# Drop any non-numeric columns (e.g., strings like 'HB102' that got into feature_df)
+# Step 4: Drop any non-numeric columns (e.g., strings like 'HB102') to avoid Arrow type mismatch
 feature_df = feature_df.select_dtypes(include=["number"])
 
-# Step 4: Insert into Hopsworks
+# Step 5: Insert into feature group
 fg = fs.get_or_create_feature_group(
     name="citi_bike_features",
     version=2,
