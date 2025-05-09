@@ -11,7 +11,11 @@ fs = project.get_feature_store()
 
 # Step 2: Load new raw data (this could be S3, CSVs, or dummy rows for automation)
 # Replace this with your real data load step
-new_data = pd.read_csv("data/validated/ts_data.csv")  # example path
+project = hopsworks.login()
+fs = project.get_feature_store()
+fg = fs.get_feature_group(name="citi_bike_features", version=2)
+new_data = fg.read(read_options={"use_hive": True})  # Load data from Hopsworks
+
 
 # Step 3: Run feature engineering
 feature_df = engineer_features(new_data)
