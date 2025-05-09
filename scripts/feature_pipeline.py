@@ -2,7 +2,8 @@
 
 import hopsworks
 import pandas as pd
-from scripts.data_utils import engineer_features  # make sure this function is defined
+from scripts.data_utils import transform_ts_data_into_features_and_target_loop
+  
 
 # Step 1: Connect to Hopsworks
 project = hopsworks.login()
