@@ -2,7 +2,6 @@ import hopsworks
 import joblib
 import tempfile
 import lightgbm as lgb
-import pandas as pd
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 
@@ -27,13 +26,13 @@ y_pred = model.predict(X_test)
 mae = mean_absolute_error(y_test, y_pred)
 
 # Step 5: Save and register model to Hopsworks
-model_dir = tempfile.mkdtemp()
-joblib.dump(model, f"{model_dir}/model.pkl")
+model_path = tempfile.mkdtemp()
+joblib.dump(model, f"{model_path}/model.pkl")
 
 mr = project.get_model_registry()
 model_hops = mr.python.create_model(
     name="citi_bike_best_model",
-    model_dir=model_dir,
+    model_path=model_path,
     input_example=X_train[:2],
     description="LightGBM model trained on Citi Bike features",
     requirements=["lightgbm", "scikit-learn"],
