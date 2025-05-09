@@ -1,3 +1,5 @@
+import pandas as pd
+
 def transform_ts_data_into_features_and_target_loop(ts_df, location_ids):
     feature_dfs = {}
 
