@@ -8,10 +8,12 @@ from mlflow.tracking import MlflowClient
 # --- Connect to Hopsworks securely using Streamlit secrets ---
 def connect_hopsworks():
     try:
-        api_key = st.secrets["HOPSWORKS_API_KEY"]  # corrected key name
-        project = hopsworks.login(api_key=st.secrets["HOPSWORKS_API_KEY"])
+        project = hopsworks.login(
+            api_key=st.secrets["HOPSWORKS_API_KEY"],
+            project=st.secrets["HOPSWORKS_PROJECT"]
+        )
     except Exception as e:
-        st.error("❌ Could not authenticate with Hopsworks. Please check your API key in Streamlit secrets.")
+        st.error("❌ Could not authenticate with Hopsworks. Please check your API key and project name in Streamlit secrets.")
         st.stop()
 
     fs = project.get_feature_store()
