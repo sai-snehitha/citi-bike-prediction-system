@@ -9,9 +9,9 @@ from mlflow.tracking import MlflowClient
 def connect_hopsworks():
     try:
         project = hopsworks.login(
-            project=st.secrets["HOPSWORKS_PROJECT"],
             api_key=st.secrets["HOPSWORKS_API_KEY"]
         )
+        project = hopsworks.get_project(st.secrets["HOPSWORKS_PROJECT"])
     except Exception as e:
         st.error("❌ Could not authenticate with Hopsworks. Please check your API key and project name in Streamlit secrets.")
         st.stop()
@@ -19,6 +19,7 @@ def connect_hopsworks():
     fs = project.get_feature_store()
     mr = project.get_model_registry()
     return project, fs, mr
+
 
 
 # --- Get latest prediction for a given location ---
