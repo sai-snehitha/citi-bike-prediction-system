@@ -29,13 +29,12 @@ mae = mean_absolute_error(y_test, y_pred)
 model_dir = tempfile.mkdtemp()
 joblib.dump(model, f"{model_dir}/model.pkl")
 
-# Step 6: Register to Hopsworks
+# Step 6: Register model
 model_hops = mr.python.create_model(
     name="citi_bike_best_model",
     metrics={"mae": mae},
     description="LightGBM model for Citi Bike predictions",
-    input_example=X_train[:2],
-    requirements=["lightgbm", "scikit-learn"]
+    input_example=X_train[:2]
 )
 
 model_hops.save(model_dir=model_dir)
