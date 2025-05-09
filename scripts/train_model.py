@@ -8,12 +8,6 @@ from sklearn.model_selection import train_test_split
 project = hopsworks.login()
 fs = project.get_feature_store()
 
-# Set MLflow URI to Hopsworks
-mlflow.set_tracking_uri(project.get_mlflow_tracking_url())
-
-
-
-
 # Step 2: Load feature data
 fg = fs.get_feature_group(name="citi_bike_features", version=2)
 df = fg.read()
@@ -24,7 +18,7 @@ y = df["target"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Step 4: Train and log model
+# ✅ Step 4: Train and log model (Hopsworks handles MLflow tracking)
 with mlflow.start_run():
     model = lgb.LGBMRegressor()
     model.fit(X_train, y_train)
