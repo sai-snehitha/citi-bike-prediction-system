@@ -2,13 +2,22 @@
 
 import hopsworks
 import pandas as pd
+import streamlit as st
+import os
+import mlflow
+from mlflow.tracking import MlflowClient
 
+# --- Connect to Hopsworks securely using Streamlit secrets ---
 def connect_hopsworks():
-    project = hopsworks.login()
+    project = hopsworks.login(
+        project=st.secrets["HOPSWORKS"]["project"],
+        api_key=st.secrets["HOPSWORKS"]["api_key"]
+    )
     fs = project.get_feature_store()
     mr = project.get_model_registry()
     return project, fs, mr
 
+# --- Get latest prediction for a given location ---
 def get_latest_prediction(location_id: str):
     project, fs, _ = connect_hopsworks()
     fg = fs.get_feature_group("citi_bike_predictions", version=1)
@@ -24,14 +33,11 @@ def get_latest_prediction(location_id: str):
         "timestamp": pd.to_datetime(latest["prediction_time"], unit='ms')
     }
 
+# --- Fetch MAE from DagsHub MLflow securely via Streamlit secrets ---
 def get_mae_for_location(location_id: str):
-    import mlflow
-    from mlflow.tracking import MlflowClient
-    import os
+    os.environ["MLFLOW_TRACKING_USERNAME"] = st.secrets["DAGSHUB"]["username"]
+    os.environ["MLFLOW_TRACKING_PASSWORD"] = st.secrets["DAGSHUB"]["token"]
 
-    # Connect to DagsHub MLflow
-    os.environ["MLFLOW_TRACKING_USERNAME"] = "sai-snehitha"
-    os.environ["MLFLOW_TRACKING_PASSWORD"] = "3839b03fcfbd9bbf825ac906976bb766a9868657"
     mlflow.set_tracking_uri("https://dagshub.com/sai-snehitha/citi-bike-prediction-system.mlflow")
     mlflow.set_experiment("citi-bike-project")
 
