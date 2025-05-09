@@ -1,3 +1,6 @@
 venv/
 __pycache__/
 .ipynb_checkpoints/
+
+streamlit_app/secrets.toml
+streamlit_app/secrets.toml
