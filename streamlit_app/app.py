@@ -1,15 +1,17 @@
 # streamlit_app/app.py
 
 import streamlit as st
-st.write("🔐 Loaded secrets: Hopsworks Key =", st.secrets["HOPSWORKS_API_KEY"][:5], "...")
-
-
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import pydeck as pdk
 import plotly.graph_objects as go
 
+# Set Streamlit config first!
+st.set_page_config(page_title="Citi Bike Predictor", layout="wide")
+
+# For verification
+st.write("🔐 Loaded secrets: Hopsworks Key =", st.secrets["HOPSWORKS_API_KEY"][:5], "...")
 from utils.hopsworks_utils import get_latest_prediction, get_mae_for_location
 
 # --- Station Info ---
