@@ -23,7 +23,7 @@ model_lgb = joblib.load(model_path)
 
 # Step 5: Run predictions for each location
 predictions = []
-prediction_time = datetime.now()
+prediction_time = datetime.utcnow()  # Use UTC to avoid local timezone issues
 
 for loc in top_locations:
     latest = df[df["location_id"] == loc].sort_values("pickup_hour").tail(1)
@@ -47,4 +47,4 @@ pred_fg = fs.get_or_create_feature_group(
 
 pred_fg.insert(df_pred)
 
-print("✅ Predictions inserted for all available locations:", [p[0] for p in predictions])
+print("✅ Predictions inserted for locations:", [p[0] for p in predictions])
