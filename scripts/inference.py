@@ -1,5 +1,3 @@
-# inference.py
-
 import hopsworks
 import joblib
 import pandas as pd
@@ -15,7 +13,7 @@ fg = fs.get_feature_group(name="citi_bike_features", version=2)
 df = fg.read(read_options={"use_hive": True})
 
 # Step 3: Define top 3 location_ids
-top_locations = ["JC115", "375", "319"]  # Replace with your actual locations if needed
+top_locations = ["HB102", "HB105", "JC115"]
 
 # Step 4: Load latest model
 model = mr.get_model("citi_bike_best_model", version=1)
@@ -25,13 +23,15 @@ model_lgb = joblib.load(model_path)
 
 # Step 5: Run predictions for each location
 predictions = []
+prediction_time = datetime.now()
+
 for loc in top_locations:
     latest = df[df["location_id"] == loc].sort_values("pickup_hour").tail(1)
     if latest.empty:
-        continue  # Skip if no data for location
+        print(f"⚠️ No data found for location {loc}. Skipping.")
+        continue
     X_latest = latest[[col for col in df.columns if "lag_" in col or col in ["hour", "dayofweek", "is_weekend"]]]
     y_pred = model_lgb.predict(X_latest)[0]
-    prediction_time = datetime.now()  # Unique timestamp per row
     predictions.append((loc, y_pred, prediction_time))
 
 # Step 6: Insert into Hopsworks
@@ -47,4 +47,4 @@ pred_fg = fs.get_or_create_feature_group(
 
 pred_fg.insert(df_pred)
 
-print("✅ Predictions inserted for all top 3 locations")
+print("✅ Predictions inserted for all available locations:", [p[0] for p in predictions])
