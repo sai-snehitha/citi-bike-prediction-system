@@ -10,8 +10,9 @@ from mlflow.tracking import MlflowClient
 
 def connect_hopsworks():
     try:
-        api_key = st.secrets["HOPSWORKS"]["HOPSWORKS_API_KEY"]
-        project_name = st.secrets["HOPSWORKS"]["HOPSWORKS_PROJECT"]
+        # Read keys using correct casing and structure
+        api_key = st.secrets["HOPSWORKS"]["api_key"]
+        project_name = st.secrets["HOPSWORKS"]["project"]
 
         hopsworks.login(api_key=api_key)
         project = hopsworks.get_project(project_name)
@@ -22,6 +23,7 @@ def connect_hopsworks():
     fs = project.get_feature_store()
     mr = project.get_model_registry()
     return project, fs, mr
+
 
 
 
