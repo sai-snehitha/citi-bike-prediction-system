@@ -1,6 +1,9 @@
+# scripts/train_model.py
+
 import hopsworks
 import mlflow
 import lightgbm as lgb
+import pandas as pd
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 
@@ -18,7 +21,10 @@ y = df["target"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# ✅ Step 4: Train and log model (Hopsworks handles MLflow tracking)
+# Step 4: Train and log model to DagsHub MLflow
+mlflow.set_tracking_uri("https://dagshub.com/sai-snehitha/citi-bike-prediction-system.mlflow")
+mlflow.set_registry_uri("https://dagshub.com/sai-snehitha/citi-bike-prediction-system.mlflow")
+
 with mlflow.start_run():
     model = lgb.LGBMRegressor()
     model.fit(X_train, y_train)
@@ -33,4 +39,16 @@ with mlflow.start_run():
         registered_model_name="citi_bike_best_model"
     )
 
-print("✅ Model trained and registered with MLflow.")
+# Step 5: Save model to Hopsworks Model Registry
+model_registry = project.get_model_registry()
+model_hopsworks = model_registry.python.create_model(
+    name="citi_bike_best_model",
+    metrics={"mae": mae},
+    model=model,
+    input_example=X_train.iloc[:1],
+    model_schema=X_train,
+    description="LightGBM model for Citi Bike prediction"
+)
+model_hopsworks.save()
+
+print("✅ Model logged to DagsHub MLflow and saved to Hopsworks Registry.")
