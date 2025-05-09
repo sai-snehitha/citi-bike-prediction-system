@@ -1,5 +1,3 @@
-# streamlit_app/utils/hopsworks_utils.py
-
 import hopsworks
 import pandas as pd
 import streamlit as st
@@ -9,10 +7,7 @@ from mlflow.tracking import MlflowClient
 
 # --- Connect to Hopsworks securely using Streamlit secrets ---
 def connect_hopsworks():
-    project = hopsworks.login(
-        project=st.secrets["HOPSWORKS"]["project"],
-        api_key=st.secrets["HOPSWORKS"]["api_key"]
-    )
+    project = hopsworks.login(api_key=st.secrets["HOPSWORKS"]["api_key"])
     fs = project.get_feature_store()
     mr = project.get_model_registry()
     return project, fs, mr
