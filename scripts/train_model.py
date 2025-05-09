@@ -9,7 +9,8 @@ project = hopsworks.login()
 fs = project.get_feature_store()
 
 # Set MLflow URI to Hopsworks
-mlflow.set_tracking_uri(project.get_mlflow_tracking_url())
+mlflow.set_tracking_uri(project.get_training_client().get_mlflow_tracking_url())
+
 
 # Step 2: Load feature data
 fg = fs.get_feature_group(name="citi_bike_features", version=2)
