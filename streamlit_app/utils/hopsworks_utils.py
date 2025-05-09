@@ -12,6 +12,10 @@ def connect_hopsworks():
     try:
         # First authenticate
         hopsworks.login(api_key=st.secrets["HOPSWORKS_API_KEY"])
+        except Exception as e:
+        st.error(f"❌ Hopsworks login failed: {e}")
+        st.stop()
+
         # Then get the specific project handle
         project = hopsworks.get_project(st.secrets["HOPSWORKS_PROJECT"])
     except Exception as e:
