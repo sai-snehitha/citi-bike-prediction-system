@@ -1,16 +1,19 @@
 # streamlit_app/app.py
 
 import streamlit as st
+
+# ✅ Set page config FIRST before any other Streamlit commands
+st.set_page_config(page_title="Citi Bike Predictor", layout="wide")
+
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import pydeck as pdk
 import plotly.graph_objects as go
 
-# Set Streamlit config first!
-st.set_page_config(page_title="Citi Bike Predictor", layout="wide")
+from utils.hopsworks_utils import get_latest_prediction, get_mae_for_location
 
-import streamlit as st
+# 🔐 Debug secret loading
 st.write("🔐 Loaded secrets: Hopsworks Key =", st.secrets["HOPSWORKS_API_KEY"][:5], "...")
 
 # --- Station Info ---
@@ -26,13 +29,15 @@ STATION_COORDS = {
     "JC115": [40.7194, -74.0421]
 }
 
-st.set_page_config(page_title="Citi Bike Predictor", layout="wide")
+# --- UI Header ---
 st.markdown("<h1 style='font-size: 38px;'>🚴‍♂️ Citi Bike Prediction Dashboard</h1>", unsafe_allow_html=True)
-st.markdown("This app shows hourly ride demand predictions for key Citi Bike stations in Jersey City.")
+st.markdown("This app shows hourly ride demand predictions for key Citi Bike stations in NY.")
 
+# --- Location Selection ---
 location_name = st.selectbox("📍 Select a Location", list(STATION_NAMES.items()), format_func=lambda x: x[1])
 location_id = location_name[0]
 
+# --- Fetch Latest Prediction ---
 prediction_data = get_latest_prediction(location_id)
 
 if prediction_data:
@@ -42,13 +47,13 @@ if prediction_data:
 else:
     st.warning("No prediction data available for this location.")
 
-# --- Gauge Chart for MAE of Reduced_LGBM ---
+# --- MAE Gauge ---
 maes = get_mae_for_location(location_id)
 if maes and maes["Reduced_LGBM"] is not None:
     fig_gauge = go.Figure(go.Indicator(
         mode="gauge+number",
         value=maes["Reduced_LGBM"],
-        title={'text': "LightGBM MAE(All features)"},
+        title={'text': "LightGBM MAE (All features)"},
         gauge={
             'axis': {'range': [0, 5]},
             'bar': {'color': "darkblue"},
@@ -61,7 +66,7 @@ if maes and maes["Reduced_LGBM"] is not None:
     ))
     st.plotly_chart(fig_gauge, use_container_width=True)
 
-# --- Prediction Trend (Last 8 Hours) ---
+# --- Prediction Trend ---
 st.markdown("### 📉 Prediction Trend (Last 8 Hours)")
 trend_data = pd.DataFrame({
     "timestamp": pd.date_range(end=pd.Timestamp.now(), periods=8, freq="H"),
@@ -70,7 +75,7 @@ trend_data = pd.DataFrame({
 fig_trend = px.line(trend_data, x="timestamp", y="prediction", title="📈 Prediction Trend", markers=True)
 st.plotly_chart(fig_trend, use_container_width=True)
 
-# --- Peak Ride Volume (stay in app) ---
+# --- Ride Volume Activity ---
 st.markdown("### ⏰ Peak Ride Activity by Time Block")
 hours = pd.date_range(end=pd.Timestamp.now(), periods=24, freq="H")
 ride_counts = np.random.poisson(lam=4, size=24)
@@ -86,7 +91,7 @@ fig_activity = px.bar(activity_summary, x="3_hour_block", y="rides",
                       color="rides", color_continuous_scale="Viridis")
 st.plotly_chart(fig_activity, use_container_width=True)
 
-# --- Map ---
+# --- Station Map ---
 if location_id in STATION_COORDS:
     lat, lon = STATION_COORDS[location_id]
     st.markdown("### 🗺️ Station Location")
