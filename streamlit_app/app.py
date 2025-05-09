@@ -17,6 +17,7 @@ from utils.hopsworks_utils import get_latest_prediction, get_mae_for_location
 st.write("🔐 Loaded secrets: Hopsworks Key =", st.secrets["HOPSWORKS_API_KEY"][:5], "...")
 
 
+
 # --- Station Info ---
 STATION_NAMES = {
     "HB102": "Hoboken Terminal - River St & Hudson Pl",
