@@ -35,9 +35,8 @@ model_hops = mr.python.create_model(
     metrics={"mae": mae},
     description="LightGBM model for Citi Bike predictions",
     input_example=X_train[:2],
-    model_dir=model_dir,
     requirements=["lightgbm", "scikit-learn"]
 )
 
-model_hops.save()
+model_hops.save(model_dir=model_dir)
 print("✅ Model trained and saved to Hopsworks.")
