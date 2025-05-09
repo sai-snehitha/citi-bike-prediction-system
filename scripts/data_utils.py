@@ -24,6 +24,10 @@ def transform_ts_data_into_features_and_target_loop(ts_df, location_ids):
         df["dayofweek"] = df.index.dayofweek
         df["is_weekend"] = df["dayofweek"].isin([5, 6]).astype(int)
 
+        # ✅ Required by Hopsworks schema
+        df["location_id"] = location_id  # as string
+        df["pickup_hour"] = df.index     # timestamp column
+
         df.dropna(inplace=True)
         feature_dfs[location_id] = df
 
