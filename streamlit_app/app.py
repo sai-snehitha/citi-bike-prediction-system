@@ -1,7 +1,8 @@
 # streamlit_app/app.py
 
 import streamlit as st
-st.write("🔐 Loaded secrets:", st.secrets["HOPSWORKS"]["api_key"][:5], "...")
+st.write("🔐 Loaded secrets: Hopsworks Key =", st.secrets["HOPSWORKS_API_KEY"][:5], "...")
+
 
 import pandas as pd
 import numpy as np
