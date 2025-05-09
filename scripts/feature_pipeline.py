@@ -6,22 +6,19 @@ from scripts.data_utils import transform_ts_data_into_features_and_target_loop
 project = hopsworks.login()
 fs = project.get_feature_store()
 
-# Step 2: Load raw time series data from an existing feature group
+# Step 2: Load raw data from feature store
 fg = fs.get_feature_group(name="citi_bike_features", version=2)
 ts_df = fg.read(read_options={"use_hive": True})
 
-# Step 3: Extract all unique location IDs from the dataset
-location_ids = ts_df.columns[ts_df.columns.str.startswith("JC")]  # update this if needed
-# OR more robustly:
-location_ids = ts_df.columns.difference(["pickup_hour"])
+# Step 3: Run feature engineering
+location_ids = ["JC115"]  # You can include others like "HB102", "HB105"
+feature_dfs = transform_ts_data_into_features_and_target_loop(ts_df, location_ids=location_ids)
+feature_df = pd.concat(feature_dfs.values())
 
-# Step 4: Run feature engineering
-feature_dfs = transform_ts_data_into_features_and_target_loop(ts_df, location_ids)
+# Drop any non-numeric columns (e.g., strings like 'HB102' that got into feature_df)
+feature_df = feature_df.select_dtypes(include=["number"])
 
-# Step 5: Combine all location DataFrames into one
-feature_df = pd.concat(feature_dfs.values()).reset_index()
-
-# Step 6: Load engineered features into Hopsworks
+# Step 4: Insert into Hopsworks
 fg = fs.get_or_create_feature_group(
     name="citi_bike_features",
     version=2,
@@ -30,4 +27,4 @@ fg = fs.get_or_create_feature_group(
 )
 
 fg.insert(feature_df, write_options={"wait_for_job": True})
-print("✅ All features loaded to Hopsworks.")
+print("✅ Feature group loaded to Hopsworks.")
