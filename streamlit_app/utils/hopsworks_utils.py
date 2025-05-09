@@ -10,11 +10,9 @@ from mlflow.tracking import MlflowClient
 
 def connect_hopsworks():
     try:
-        # Access nested secrets correctly
-        api_key = st.secrets["HOPSWORKS"]["api_key"]
-        project_name = st.secrets["HOPSWORKS"]["project"]
+        api_key = st.secrets["HOPSWORKS"]["HOPSWORKS_API_KEY"]
+        project_name = st.secrets["HOPSWORKS"]["HOPSWORKS_PROJECT"]
 
-        # Authenticate and connect to the correct project
         hopsworks.login(api_key=api_key)
         project = hopsworks.get_project(project_name)
     except Exception as e:
@@ -24,6 +22,7 @@ def connect_hopsworks():
     fs = project.get_feature_store()
     mr = project.get_model_registry()
     return project, fs, mr
+
 
 
 
