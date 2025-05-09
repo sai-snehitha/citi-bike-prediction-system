@@ -10,8 +10,11 @@ fs = project.get_feature_store()
 fg = fs.get_feature_group(name="citi_bike_features", version=2)
 ts_df = fg.read(read_options={"use_hive": True})
 
+# ✅ Define location IDs from the data itself
+location_ids = ts_df["location_id"].unique().tolist()
+
 # Step 3: Run feature engineering
-feature_dict = transform_ts_data_into_features_and_target_loop(new_data, location_ids)
+feature_dict = transform_ts_data_into_features_and_target_loop(ts_df, location_ids)
 
 # ✅ Combine all per-location DataFrames into a single DataFrame
 feature_df = pd.concat(feature_dict.values())
@@ -26,4 +29,3 @@ fg = fs.get_or_create_feature_group(
 
 fg.insert(feature_df, write_options={"wait_for_job": True})
 print("✅ Feature group loaded to Hopsworks.")
-
