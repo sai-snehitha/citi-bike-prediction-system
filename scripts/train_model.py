@@ -25,14 +25,12 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 mae = mean_absolute_error(y_test, y_pred)
 
-# Step 5: Save to a temp dir
+# Step 5: Save model to temp dir
 model_dir = tempfile.mkdtemp()
 joblib.dump(model, f"{model_dir}/model.pkl")
 
-# Step 6: Register the model using Hopsworks Model class
-from hopsworks.model import Model
-
-model_hops = Model(
+# Step 6: Register to Hopsworks
+model_hops = mr.python.create_model(
     name="citi_bike_best_model",
     metrics={"mae": mae},
     description="LightGBM model for Citi Bike predictions",
