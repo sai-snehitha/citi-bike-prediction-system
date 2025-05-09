@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 from utils.hopsworks_utils import get_latest_prediction, get_mae_for_location
 
 # 🔐 Debug secret loading
-st.write("🔐 Loaded secrets: Hopsworks Key =", st.secrets["HOPSWORKS"]["api_key"][:5], "...")
+st.write("🔐 Loaded secrets: Hopsworks Key =", st.secrets["HOPSWORKS_NEW"]["api_key"][:5], "...")
 
 
 
