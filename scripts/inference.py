@@ -1,3 +1,5 @@
+# inference.py
+
 import hopsworks
 import joblib
 import pandas as pd
@@ -13,7 +15,7 @@ fg = fs.get_feature_group(name="citi_bike_features", version=2)
 df = fg.read(read_options={"use_hive": True})
 
 # Step 3: Define top 3 location_ids
-top_locations = ["JC115", "375", "319"]
+top_locations = ["JC115", "375", "319"]  # Replace with your actual locations if needed
 
 # Step 4: Load latest model
 model = mr.get_model("citi_bike_best_model", version=1)
@@ -21,14 +23,15 @@ model_dir = model.download()
 model_path = model_dir + "/model.pkl"
 model_lgb = joblib.load(model_path)
 
-# Step 5: Run predictions
+# Step 5: Run predictions for each location
 predictions = []
-prediction_time = datetime.now()
-
 for loc in top_locations:
     latest = df[df["location_id"] == loc].sort_values("pickup_hour").tail(1)
+    if latest.empty:
+        continue  # Skip if no data for location
     X_latest = latest[[col for col in df.columns if "lag_" in col or col in ["hour", "dayofweek", "is_weekend"]]]
     y_pred = model_lgb.predict(X_latest)[0]
+    prediction_time = datetime.now()  # Unique timestamp per row
     predictions.append((loc, y_pred, prediction_time))
 
 # Step 6: Insert into Hopsworks
@@ -37,9 +40,9 @@ df_pred = pd.DataFrame(predictions, columns=["location_id", "prediction", "predi
 pred_fg = fs.get_or_create_feature_group(
     name="citi_bike_predictions",
     version=1,
-    primary_key=["location_id", "prediction_time"],  # Add time to PK
+    primary_key=["location_id", "prediction_time"],
     description="Predicted rides per location",
-    event_time="prediction_time"  # Optional for time-based queries
+    event_time="prediction_time"
 )
 
 pred_fg.insert(df_pred)
