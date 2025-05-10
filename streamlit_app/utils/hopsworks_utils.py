@@ -6,7 +6,7 @@ import os
 
 
 def connect_hopsworks():
-    os.environ["HOPSWORKS_API_KEY"] = "tMxCpQUhLIu3cF4M.MvcKqmKXfVYzHBeLz15mgRmViawD3LkZNefu9mFHYMQRYu6udS1tVMELdG5aJYpA"
+    os.environ["HOPSWORKS_API_KEY"] = "Bay9NH1XKrLIxD3P.ADKuYP3KuhEpgyPSpQUzollyck1Z6ndplMqjtOZj69rJaeDzRQROCx3II7TwRmWa"
     os.environ["HOPSWORKS_PROJECT"] = "sneha_taxi_project"
 
     project = hopsworks.login()
