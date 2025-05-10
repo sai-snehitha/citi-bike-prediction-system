@@ -8,14 +8,6 @@ import mlflow
 from mlflow.tracking import MlflowClient
 
 def connect_hopsworks():
-    import os
-    import hopsworks
-    from dotenv import load_dotenv
-
-    load_dotenv()
-
-    os.environ["HOPSWORKS_API_KEY"] = os.getenv("HOPSWORKS_API_KEY")
-
     project = hopsworks.login(
         project=os.getenv("HOPSWORKS_PROJECT")
     )
@@ -39,8 +31,7 @@ def get_latest_prediction(location_id: str):
         "timestamp": pd.to_datetime(latest["prediction_time"], unit='ms')
     }
 
-from dotenv import load_dotenv
-load_dotenv()
+
 def get_mae_for_location(location_id: str):
     os.environ["MLFLOW_TRACKING_USERNAME"] = os.environ["MLFLOW_USERNAME"]
     os.environ["MLFLOW_TRACKING_PASSWORD"] = os.environ["MLFLOW_PASSWORD"]
