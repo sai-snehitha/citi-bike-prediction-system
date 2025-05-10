@@ -2,6 +2,7 @@ import hopsworks
 import joblib
 import pandas as pd
 from datetime import datetime
+import os
 
 # Step 1: Connect to Hopsworks
 project = hopsworks.login()
@@ -21,7 +22,7 @@ model_dir = model.download()
 model_path = model_dir + "/model.pkl"
 model_lgb = joblib.load(model_path)
 
-# Step 5: Run predictions for each location
+# Step 5: Run predictions
 predictions = []
 prediction_time = datetime.now()
 
@@ -30,11 +31,12 @@ for loc in top_locations:
     if latest.empty:
         print(f"⚠️ No data found for location {loc}. Skipping.")
         continue
+
     X_latest = latest[[col for col in df.columns if "lag_" in col or col in ["hour", "dayofweek", "is_weekend"]]]
     y_pred = model_lgb.predict(X_latest)[0]
     predictions.append((loc, y_pred, prediction_time))
 
-# Step 6: Insert into Hopsworks
+# Step 6: Save to Hopsworks
 df_pred = pd.DataFrame(predictions, columns=["location_id", "prediction", "prediction_time"])
 
 pred_fg = fs.get_or_create_feature_group(
@@ -44,7 +46,19 @@ pred_fg = fs.get_or_create_feature_group(
     description="Predicted rides per location",
     event_time="prediction_time"
 )
-
 pred_fg.insert(df_pred)
 
-print("✅ Predictions inserted for locations:", [p[0] for p in predictions])
+# Step 7: Save to CSVs in data/predictions
+os.makedirs("data/predictions", exist_ok=True)
+
+for loc in top_locations:
+    loc_df = df_pred[df_pred["location_id"] == loc].copy()
+    file_path = f"data/predictions/location_{loc}.csv"
+
+    if os.path.exists(file_path):
+        existing_df = pd.read_csv(file_path, parse_dates=["prediction_time"])
+        loc_df = pd.concat([existing_df, loc_df], ignore_index=True).drop_duplicates()
+
+    loc_df.to_csv(file_path, index=False)
+
+print("✅ Predictions inserted into Hopsworks and saved locally.")
