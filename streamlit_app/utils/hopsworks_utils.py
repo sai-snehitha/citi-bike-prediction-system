@@ -2,12 +2,14 @@ import pandas as pd
 import mlflow
 from mlflow.tracking import MlflowClient
 import hopsworks
+import os
+
 
 def connect_hopsworks():
-    project = hopsworks.login(
-        api_key="tMxCpQUhLIu3cF4M.MvcKqmKXfVYzHBeLz15mgRmViawD3LkZNefu9mFHYMQRYu6udS1tVMELdG5aJYpA",
-        project="sneha_taxi_project"
-    )
+    os.environ["HOPSWORKS_API_KEY"] = "tMxCpQUhLIu3cF4M.MvcKqmKXfVYzHBeLz15mgRmViawD3LkZNefu9mFHYMQRYu6udS1tVMELdG5aJYpA"
+    os.environ["HOPSWORKS_PROJECT"] = "sneha_taxi_project"
+
+    project = hopsworks.login()
     fs = project.get_feature_store()
     mr = project.get_model_registry()
     return project, fs, mr
