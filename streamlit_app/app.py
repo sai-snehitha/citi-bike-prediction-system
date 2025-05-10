@@ -36,7 +36,7 @@ station_id = st.sidebar.radio("", list(STATION_NAMES.keys()), format_func=lambda
 # --- Add Image in Sidebar ---
 st.sidebar.image(
     "https://nypost.com/wp-content/uploads/sites/2/2020/03/citi_bike.jpg?quality=75&strip=all&w=1200",
-    use_column_width=True,
+    use_container_width=True,
     caption="Citi Bike NYC"
 )
 
