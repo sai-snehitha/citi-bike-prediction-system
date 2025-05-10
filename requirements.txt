@@ -116,3 +116,4 @@ numpy
 plotly
 pydeck
 hopsworks
+python-dotenv
