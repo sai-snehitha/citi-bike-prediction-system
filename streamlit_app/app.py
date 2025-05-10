@@ -10,9 +10,9 @@ from utils.hopsworks_utils import get_latest_prediction, get_mae_for_location
 
 # --- Station Info ---
 STATION_NAMES = {
-    "HB102": "Harborside Financial",
-    "HB105": "Newport Pkwy",
-    "JC115": "Jersey City Grove St"
+    "HB102": "Hoboken Terminal - River St & Hudson Pl",
+    "HB105": "City Hall - Washington St & 1 St",
+    "JC115": "Grove St PATH"
 }
 
 STATION_COORDS = {
@@ -24,7 +24,7 @@ STATION_COORDS = {
 # --- Streamlit UI ---
 st.set_page_config(page_title="Citi Bike Predictor", layout="wide")
 st.markdown("<h1 style='font-size: 38px;'>🚴‍♂️ Citi Bike Prediction Dashboard</h1>", unsafe_allow_html=True)
-st.markdown("This app shows hourly ride demand predictions for key Citi Bike stations in Jersey City.")
+st.markdown("This app shows hourly ride demand predictions for key Citi Bike stations in NY.")
 
 # --- Location Dropdown ---
 location_name = st.selectbox("📍 Select a Location", list(STATION_NAMES.items()), format_func=lambda x: x[1])
