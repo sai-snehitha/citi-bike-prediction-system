@@ -11,9 +11,8 @@ from mlflow.tracking import MlflowClient
 def connect_hopsworks():
     try:
         # ✅ Correctly reference section name in Streamlit secrets
-        api_key = st.secrets["HOPSWORKS_NEW"]["api_key"]
-        project_name = st.secrets["HOPSWORKS_NEW"]["project"]
-
+        api_key = st.secrets["HOPSWORKS_API_KEY"]
+        project_name = st.secrets["HOPSWORKS_PROJECT"]
         # ✅ Authenticate with Hopsworks
         hopsworks.login(api_key=api_key)
         project = hopsworks.get_project(project_name)
