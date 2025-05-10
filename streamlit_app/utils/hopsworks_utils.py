@@ -1,19 +1,28 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 import hopsworks
-import streamlit as st
 import pandas as pd
 import mlflow
 from mlflow.tracking import MlflowClient
-import os
 
 def connect_hopsworks():
-    # Set API key via environment variable (Hopsworks SDK expects this)
-    os.environ["HOPSWORKS_API_KEY"] = st.secrets["hopsworks"]["api_key"]
+    import os
+    import hopsworks
+    from dotenv import load_dotenv
 
-    # Login without passing api_key directly
-    project = hopsworks.login(project=st.secrets["hopsworks"]["project"])
+    load_dotenv()
+
+    os.environ["HOPSWORKS_API_KEY"] = os.getenv("HOPSWORKS_API_KEY")
+
+    project = hopsworks.login(
+        project=os.getenv("HOPSWORKS_PROJECT")
+    )
     fs = project.get_feature_store()
     mr = project.get_model_registry()
     return project, fs, mr
+
 
 def get_latest_prediction(location_id: str):
     project, fs, _ = connect_hopsworks()
@@ -30,10 +39,12 @@ def get_latest_prediction(location_id: str):
         "timestamp": pd.to_datetime(latest["prediction_time"], unit='ms')
     }
 
+from dotenv import load_dotenv
+load_dotenv()
 def get_mae_for_location(location_id: str):
-    os.environ["MLFLOW_TRACKING_USERNAME"] = st.secrets["mlflow"]["username"]
-    os.environ["MLFLOW_TRACKING_PASSWORD"] = st.secrets["mlflow"]["password"]
-    mlflow.set_tracking_uri(st.secrets["mlflow"]["tracking_uri"])
+    os.environ["MLFLOW_TRACKING_USERNAME"] = os.environ["MLFLOW_USERNAME"]
+    os.environ["MLFLOW_TRACKING_PASSWORD"] = os.environ["MLFLOW_PASSWORD"]
+    mlflow.set_tracking_uri(os.environ["MLFLOW_TRACKING_URI"])
     mlflow.set_experiment("citi-bike-project")
 
     client = MlflowClient()
