@@ -3,6 +3,16 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import pydeck as pdk
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Make sure this runs first
+
+# 🔍 Debug print to verify key is loaded correctly
+print("ENV HOPSWORKS_API_KEY", os.getenv("HOPSWORKS_API_KEY"))
+
+# Then import your utility functions
+#from utils.hopsworks_utils import get_latest_prediction, get_mae_for_location
 
 from utils.hopsworks_utils import get_latest_prediction, get_mae_for_location
 
