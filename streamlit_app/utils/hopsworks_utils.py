@@ -1,15 +1,12 @@
-import os
-from dotenv import load_dotenv
-load_dotenv()
-
-import hopsworks
 import pandas as pd
 import mlflow
 from mlflow.tracking import MlflowClient
+import hopsworks
 
 def connect_hopsworks():
     project = hopsworks.login(
-        project=os.getenv("HOPSWORKS_PROJECT")
+        api_key="tMxCpQUhLIu3cF4M.MvcKqmKXfVYzHBeLz15mgRmViawD3LkZNefu9mFHYMQRYu6udS1tVMELdG5aJYpA",
+        project="sneha_taxi_project"
     )
     fs = project.get_feature_store()
     mr = project.get_model_registry()
@@ -33,9 +30,7 @@ def get_latest_prediction(location_id: str):
 
 
 def get_mae_for_location(location_id: str):
-    os.environ["MLFLOW_TRACKING_USERNAME"] = os.environ["MLFLOW_USERNAME"]
-    os.environ["MLFLOW_TRACKING_PASSWORD"] = os.environ["MLFLOW_PASSWORD"]
-    mlflow.set_tracking_uri(os.environ["MLFLOW_TRACKING_URI"])
+    mlflow.set_tracking_uri("https://dagshub.com/sai-snehitha/citi-bike-prediction-system.mlflow")
     mlflow.set_experiment("citi-bike-project")
 
     client = MlflowClient()
