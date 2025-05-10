@@ -1,7 +1,7 @@
 import hopsworks
 import joblib
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 # Step 1: Connect to Hopsworks
@@ -22,38 +22,34 @@ model_dir = model.download()
 model_path = model_dir + "/model.pkl"
 model_lgb = joblib.load(model_path)
 
-# Step 5: Run predictions
+# Step 5: Run predictions for past 24 hours
+cutoff_time = pd.Timestamp.utcnow() - pd.Timedelta(days=7)
+
+
 predictions = []
-prediction_time = datetime.now()
 
 for loc in top_locations:
-    latest = df[df["location_id"] == loc].sort_values("pickup_hour").tail(1)
-    if latest.empty:
-        print(f"⚠️ No data found for location {loc}. Skipping.")
+    df_loc = df[(df["location_id"] == loc) & (df["pickup_hour"] >= cutoff_time)].sort_values("pickup_hour")
+
+    if df_loc.empty:
+        print(f"⚠️ No recent data for {loc}. Skipping.")
         continue
 
-    X_latest = latest[[col for col in df.columns if "lag_" in col or col in ["hour", "dayofweek", "is_weekend"]]]
-    y_pred = model_lgb.predict(X_latest)[0]
-    predictions.append((loc, y_pred, prediction_time))
+    feature_cols = [col for col in df.columns if "lag_" in col or col in ["hour", "dayofweek", "is_weekend"]]
+    X = df_loc[feature_cols]
+    y_preds = model_lgb.predict(X)
 
-# Step 6: Save to Hopsworks
+    for ts, pred in zip(df_loc["pickup_hour"], y_preds):
+        predictions.append((loc, pred, ts))
+
+# Step 6: Format and save predictions
 df_pred = pd.DataFrame(predictions, columns=["location_id", "prediction", "prediction_time"])
 
-pred_fg = fs.get_or_create_feature_group(
-    name="citi_bike_predictions",
-    version=1,
-    primary_key=["location_id", "prediction_time"],
-    description="Predicted rides per location",
-    event_time="prediction_time"
-)
-pred_fg.insert(df_pred)
-
-# Step 7: Save to CSVs in data/predictions
-os.makedirs("data/predictions", exist_ok=True)
-
+# Save to local CSVs per station
 for loc in top_locations:
     loc_df = df_pred[df_pred["location_id"] == loc].copy()
     file_path = f"data/predictions/location_{loc}.csv"
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     if os.path.exists(file_path):
         existing_df = pd.read_csv(file_path, parse_dates=["prediction_time"])
@@ -61,4 +57,4 @@ for loc in top_locations:
 
     loc_df.to_csv(file_path, index=False)
 
-print("✅ Predictions inserted into Hopsworks and saved locally.")
+print("✅ Multi-hour predictions saved locally.")
