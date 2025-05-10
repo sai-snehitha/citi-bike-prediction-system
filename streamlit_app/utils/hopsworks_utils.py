@@ -10,10 +10,11 @@ from mlflow.tracking import MlflowClient
 
 def connect_hopsworks():
     try:
-        # Read keys using correct casing and structure
+        # ✅ Correctly reference section name in Streamlit secrets
         api_key = st.secrets["HOPSWORKS_NEW"]["api_key"]
         project_name = st.secrets["HOPSWORKS_NEW"]["project"]
 
+        # ✅ Authenticate with Hopsworks
         hopsworks.login(api_key=api_key)
         project = hopsworks.get_project(project_name)
     except Exception as e:
@@ -23,6 +24,7 @@ def connect_hopsworks():
     fs = project.get_feature_store()
     mr = project.get_model_registry()
     return project, fs, mr
+
 
 
 
